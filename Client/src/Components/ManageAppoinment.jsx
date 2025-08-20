@@ -20,10 +20,27 @@ const ManageAppointment = () => {
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:3000/appoinmentUser/appointments/bookedShow"
-        );
-        setAppointments(res.data.userRes);
+        const [res1, res2] = await Promise.all([
+          axios.get(
+            "http://localhost:5000/appoinmentUser/appointments/bookedShow"
+          ),
+          axios.get("http://localhost:5000/appoinmentByUser/showUser"),
+        ]);
+        // console.log(res1.data.userRes);
+
+        // console.log(res2.data.user);
+
+        const userAppointments = (res1.data.userRes || []).map((a) => ({
+          ...a,
+          source: "Staff",
+        }));
+
+        const staffAppointments = (res2.data.user || []).map((a) => ({
+          ...a,
+          source: "User",
+        }));
+
+        setAppointments([...userAppointments, ...staffAppointments]);
         setLoading(false);
       } catch (err) {
         setError(err.message || "Error fetching appointments");
@@ -80,21 +97,26 @@ const ManageAppointment = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const saveEdit = async (id) => {
+  const saveEdit = async (id, source) => {
     const confirmUpdate = window.confirm(
       "Are you sure you want to update the appointment?"
     );
     if (!confirmUpdate) return;
 
     try {
-      const response = await axios.put(
-        `http://localhost:3000/appoinmentUser/appointments/updateUser/${id}`,
-        {
-          date: editForm.date,
-          slot: editForm.slot,
-          status: editForm.status,
-        }
-      );
+      // ✅ Agar source User hai toh user wali API call karo
+      // ✅ Agar source Staff hai toh staff wali API call karo
+const endPoint =
+  source === "User"
+    ? `http://localhost:5000/appoinmentByUser/updateUser/${id}` // User API
+    : `http://localhost:5000/appoinmentUser/appointments/updateUser/${id}`; // Staff API
+
+
+      const response = await axios.put(endPoint, {
+        date: editForm.date,
+        slot: editForm.slot,
+        status: editForm.status,
+      });
 
       if (response.data.status === 1) {
         alert("Appointment updated successfully");
@@ -121,16 +143,20 @@ const ManageAppointment = () => {
     }
   };
 
-  const cancelAppointment = async (id) => {
+  const cancelAppointment = async (id, source) => {
     const confirmCancel = window.confirm(
       "Are You Sure You Want To Cancel The Appointment?"
     );
     if (!confirmCancel) return;
 
     try {
-      const response = await axios.delete(
-        `http://localhost:3000/appoinmentUser/appointments/delete/${id}`
-      );
+      const endPoint =
+        source === "User"
+          ?  `http://localhost:5000/appoinmentByUser/deleteUser/${id}` // user ne appointment li khud se or staff kuch bhi kar sakta hai 
+          :`http://localhost:5000/appoinmentUser/appointments/delete/${id}` ; // stafff ne hi user kir egistration or khud kuch bhi kar sakta hai
+
+      const response = await axios.delete(endPoint);
+
       if (response.data.status === 1) {
         alert("Appointment cancelled successfully ✅");
         setAppointments((prev) => prev.filter((appt) => appt._id !== id));
@@ -190,7 +216,9 @@ const ManageAppointment = () => {
       </div>
 
       {displayedAppointments.length === 0 ? (
-        <div className="text-center text-gray-500 py-12">No appointments found.</div>
+        <div className="text-center text-gray-500 py-12">
+          No appointments found.
+        </div>
       ) : (
         <div className="space-y-4">
           {displayedAppointments.map((appt) => (
@@ -204,9 +232,14 @@ const ManageAppointment = () => {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-800 text-lg">
-                    {appt.userName}
+                    {appt.userName || appt.name}
                   </div>
-                  <div className="text-sm text-gray-500">{appt.userId}</div>
+                  <div className="text-sm text-gray-500">
+                    {appt.userId || appt.email}
+                  </div>
+                  <div className="text-xs text-purple-600">
+                    Source: {appt.source}
+                  </div>
                 </div>
               </div>
 
@@ -289,7 +322,7 @@ const ManageAppointment = () => {
                 {editingId === appt._id ? (
                   <>
                     <button
-                      onClick={() => saveEdit(appt._id)}
+                      onClick={() => saveEdit(appt._id, appt.source)}
                       className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
                     >
                       Save
@@ -310,7 +343,7 @@ const ManageAppointment = () => {
                       Edit
                     </button>
                     <button
-                      onClick={() => cancelAppointment(appt._id)}
+                      onClick={() => cancelAppointment(appt._id, appt.source)}
                       className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
                     >
                       Delete
@@ -322,6 +355,14 @@ const ManageAppointment = () => {
           ))}
         </div>
       )}
+
+      {/* {
+        userAppointments.map((user) => (
+          <div key={user._id}>
+            <h1>{user.name}</h1>
+          </div>
+        ))
+      } */}
     </div>
   );
 };

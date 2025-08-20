@@ -1,57 +1,45 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-
-const Register = () => {
-  const navigate=useNavigate();
+const UserRegister = () => {
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
+  const [email, setEmail] = useState("");
   const [contact, setContact] = useState("");
   const [idProof, setIdProof] = useState("");
+  const navigate=useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (contact.length < 10) {
-      alert("Contact number should be at least 10 digits.");
+      alert("Contact Number Should Be At Least 10 Digits");
       return;
     }
-
     const userData = {
       name,
       age,
       gender,
+      email,
       contact,
       idProof,
+
     };
-
     try {
-      const response = await fetch(
-        "http://localhost:5000/registerUser/insertUser",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userData),
-        }
-      );
+      const response = await fetch("http://localhost:5000/insertUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
       const data = await response.json();
-      console.log(data);
-
       if (data.status === 1) {
-        alert("User registered successfully!");
-        // navigate("/AppointScheduling")
-        setName("");
-        setAge("");
-        setGender("");
-        setContact("");
-        setIdProof("");
+        alert("User Registration Sucessfully");
+        navigate("/navbar")
       } else {
         alert(data.msg);
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Something went wrong!");
+      alert("Something Went Wrong!");
     }
   };
 
@@ -59,7 +47,7 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8 sm:py-12">
       <div className="w-full max-w-md sm:max-w-lg md:max-w-xl bg-white rounded-lg shadow-md p-6 sm:p-8">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          Register User By Staff
+          Register User
         </h2>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -128,6 +116,25 @@ const Register = () => {
 
           <div>
             <label
+              htmlFor="email"
+              className="block mb-1 text-sm font-medium text-gray-700"
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter Your Email"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label
               htmlFor="contactInfo"
               className="block mb-1 text-sm font-medium text-gray-700"
             >
@@ -180,4 +187,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default UserRegister;

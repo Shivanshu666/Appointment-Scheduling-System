@@ -28,7 +28,7 @@ const StaffLogin = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/staffRoute/login", {
+      const res = await fetch("http://localhost:5000/staffRoute/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

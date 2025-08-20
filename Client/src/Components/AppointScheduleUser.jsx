@@ -6,22 +6,23 @@ const MOCK_SLOTS = [
   "11:30 AM", "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
 ];
 
-const AppointScheduling = () => {
+const AppointSchedulingUser = () => {
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [selectedDate, setSelectedDate] = useState("");
   const [bookedSlots, setBookedSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
+  const [selectedEmail,setSelectedEmail]=useState("")
 
   // Fetch registered users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoadingUsers(true);
-        const res = await axios.get("http://localhost:5000/registerUser/showUser");
+        const res = await axios.get("http://localhost:5000/showUser");
         if (res.data.status === 1) {
-          setUsers(res.data.userRes);
+          setUsers(res.data.user);
         } else {
           alert("Users fetch nahi ho paaye");
         }
@@ -62,20 +63,22 @@ const AppointScheduling = () => {
     if (!selectedDate) return alert("Please select a date");
     if (!selectedSlot) return alert("Please select a time slot");
     if (!selectedUser) return alert("Please select a user");
-
+     if (!selectedEmail) return alert("Please enter user email");
+    
     const selectedUserObj = users.find((user) => user._id === selectedUser);
     if (!selectedUserObj) return alert("Selected user not found!");
 
     try {
-      const res = await axios.post("http://localhost:5000/appoinmentUser/appointments/book", {
+      const res = await axios.post("http://localhost:5000/appoinmentByUser/insertUser", {
         userId: selectedUser,
         userName: selectedUserObj.name,
+        userEmail: selectedEmail,
         date: selectedDate,
         slot: selectedSlot,
       });
 
       if (res.data.status === 1) {
-        alert("✅ Booking successful!");
+        alert("✅ Booking Is Pending Please For Staff Conformation And After 3 Hours Check Your Gmail!");
         setBookedSlots([...bookedSlots, selectedSlot]);
         setSelectedSlot("");
         setSelectedUser("");
@@ -90,7 +93,7 @@ const AppointScheduling = () => {
 
   return (
     <div className="max-w-2xl mx-auto bg-white p-4 sm:p-6 md:p-8 rounded shadow-md mt-4">
-      <h2 className="text-2xl font-bold mb-6 text-center">📅 Appointment Slot Allocation</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">📅 Appointment Slot Allocation By User</h2>
 
       {/* Date Picker */}
       <div className="mb-4">
@@ -123,6 +126,18 @@ const AppointScheduling = () => {
           )}
         </select>
       </div>
+      {/* Email Input */}
+<div className="mb-4">
+  <label className="block text-sm font-medium mb-1">📧 Enter Email</label>
+  <input
+    type="email"
+    value={selectedEmail}
+    onChange={(e) => setSelectedEmail(e.target.value)}
+    placeholder="Enter user email"
+    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+  />
+</div>
+
 
       {/* Slot Selection */}
       <div className="mb-6">
@@ -163,4 +178,4 @@ const AppointScheduling = () => {
   );
 };
 
-export default AppointScheduling;
+export default AppointSchedulingUser;

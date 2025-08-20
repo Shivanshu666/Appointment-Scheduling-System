@@ -18,7 +18,7 @@ const appoinmentSchema = new mongoose.Schema({
     type: String,
     required: true, 
   },
-      status: {
+  status: {
         type: String,
         enum: ['Pending', 'Confirmed', 'Cancelled', 'Completed'], // Example statuses
         default: 'Pending'
