@@ -7,8 +7,8 @@ const MOCK_SLOTS = [
 ];
 
 const AppointSchedulingUser = () => {
-  const [users, setUsers] = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  // const [users, setUsers] = useState([]);
+  // const [loadingUsers, setLoadingUsers] = useState(true);
   const [selectedDate, setSelectedDate] = useState("");
   const [bookedSlots, setBookedSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState("");
@@ -16,24 +16,24 @@ const AppointSchedulingUser = () => {
   const [selectedEmail,setSelectedEmail]=useState("")
 
   // Fetch registered users
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoadingUsers(true);
-        const res = await axios.get("http://localhost:5000/showUser");
-        if (res.data.status === 1) {
-          setUsers(res.data.user);
-        } else {
-          alert("Users fetch nahi ho paaye");
-        }
-      } catch (err) {
-        console.error("Frontend SE data Fetch Nahi ho Raha hai", err);
-      } finally {
-        setLoadingUsers(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     try {
+  //       setLoadingUsers(true);
+  //       const res = await axios.get("http://localhost:5000/showUser");
+  //       if (res.data.status === 1) {
+  //         setUsers(res.data.user);
+  //       } else {
+  //         alert("Users fetch nahi ho paaye");
+  //       }
+  //     } catch (err) {
+  //       console.error("Frontend SE data Fetch Nahi ho Raha hai", err);
+  //     } finally {
+  //       setLoadingUsers(false);
+  //     }
+  //   };
+  //   fetchUsers();
+  // }, []);
 
   // Fetch booked slots for selected date
   useEffect(() => {
@@ -65,13 +65,13 @@ const AppointSchedulingUser = () => {
     if (!selectedUser) return alert("Please select a user");
      if (!selectedEmail) return alert("Please enter user email");
     
-    const selectedUserObj = users.find((user) => user._id === selectedUser);
+    const selectedUserObj = {name:selectedUser};
     if (!selectedUserObj) return alert("Selected user not found!");
 
     try {
       const res = await axios.post("http://localhost:5000/appoinmentByUser/insertUser", {
-        userId: selectedUser,
-        userName: selectedUserObj.name,
+        // userId: selectedUser,
+        userName: selectedUser,
         userEmail: selectedEmail,
         date: selectedDate,
         slot: selectedSlot,
@@ -92,7 +92,7 @@ const AppointSchedulingUser = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-4 sm:p-6 md:p-8 rounded shadow-md mt-4">
+    <div className="max-w-2xl mx-auto bg-white pt-40 p-4 sm:p-6 md:p-8 rounded shadow-md mt-32">
       <h2 className="text-2xl font-bold mb-6 text-center">📅 Appointment Slot Allocation By User</h2>
 
       {/* Date Picker */}
@@ -108,23 +108,15 @@ const AppointSchedulingUser = () => {
 
       {/* User Select */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">👤 Select User</label>
-        <select
+        <label className="block text-sm font-medium mb-1">👤 Enter Patient Name</label>
+        <input
           value={selectedUser}
           onChange={(e) => setSelectedUser(e.target.value)}
+           placeholder="Enter patient name"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="">-- Choose User --</option>
-          {loadingUsers ? (
-            <option disabled>Loading users...</option>
-          ) : (
-            users.map((user) => (
-              <option key={user._id} value={user._id}>
-                {user.name} ({user.idProof})
-              </option>
-            ))
-          )}
-        </select>
+        />
+          
+     
       </div>
       {/* Email Input */}
 <div className="mb-4">

@@ -98,6 +98,18 @@ const ManageAppointment = () => {
   };
 
   const saveEdit = async (id, source) => {
+
+    // Check For Conflicts 
+    const conflicts = appointments.find(
+      (appt) =>
+        appt._id !== id && appt.date === editForm.date && appt.slot === editForm.slot && appt.status !== "Cancelled" // optional: ignore cancelled appointments
+    );
+
+    if (conflicts) {
+      alert(`Conflicts Detected , Appointment is Already Booked On This ${editForm.date} at ${editForm.slot}. Please Choose a Different Time Slot`);
+      return;
+    }
+
     const confirmUpdate = window.confirm(
       "Are you sure you want to update the appointment?"
     );
@@ -106,10 +118,10 @@ const ManageAppointment = () => {
     try {
       // ✅ Agar source User hai toh user wali API call karo
       // ✅ Agar source Staff hai toh staff wali API call karo
-const endPoint =
-  source === "User"
-    ? `http://localhost:5000/appoinmentByUser/updateUser/${id}` // User API
-    : `http://localhost:5000/appoinmentUser/appointments/updateUser/${id}`; // Staff API
+      const endPoint =
+        source === "User"
+          ? `http://localhost:5000/appoinmentByUser/updateUser/${id}` // User API
+          : `http://localhost:5000/appoinmentUser/appointments/updateUser/${id}`; // Staff API
 
 
       const response = await axios.put(endPoint, {
@@ -125,11 +137,11 @@ const endPoint =
           prev.map((appt) =>
             appt._id === id
               ? {
-                  ...appt,
-                  date: editForm.date,
-                  slot: editForm.slot,
-                  status: editForm.status,
-                }
+                ...appt,
+                date: editForm.date,
+                slot: editForm.slot,
+                status: editForm.status,
+              }
               : appt
           )
         );
@@ -152,8 +164,8 @@ const endPoint =
     try {
       const endPoint =
         source === "User"
-          ?  `http://localhost:5000/appoinmentByUser/deleteUser/${id}` // user ne appointment li khud se or staff kuch bhi kar sakta hai 
-          :`http://localhost:5000/appoinmentUser/appointments/delete/${id}` ; // stafff ne hi user kir egistration or khud kuch bhi kar sakta hai
+          ? `http://localhost:5000/appoinmentByUser/deleteUser/${id}` // user ne appointment li khud se or staff kuch bhi kar sakta hai 
+          : `http://localhost:5000/appoinmentUser/appointments/delete/${id}`; // stafff ne hi user kir egistration or khud kuch bhi kar sakta hai
 
       const response = await axios.delete(endPoint);
 
@@ -201,11 +213,10 @@ const endPoint =
           <button
             key={key}
             onClick={() => toggleSort(key)}
-            className={`flex-1 text-sm font-semibold px-3 py-2 rounded-md border ${
-              sortKey === key
+            className={`flex-1 text-sm font-semibold px-3 py-2 rounded-md border ${sortKey === key
                 ? "bg-blue-600 text-white border-blue-600"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-            }`}
+              }`}
           >
             {key === "userName"
               ? "Patient"
@@ -237,8 +248,17 @@ const endPoint =
                   <div className="text-sm text-gray-500">
                     {appt.userId || appt.email}
                   </div>
-                  <div className="text-xs text-purple-600">
+                  <div className="text-sm font-bold text-red-600">
                     Source: {appt.source}
+                  </div>
+
+                  <div className="text-sm text-amber-500 font-bold ">
+                    {/* createdAt ya bookingTime ko human readable date me format karo */}
+                    <p>
+                      Booked On: {appt.createdAt
+                        ? new Date(Date.parse(appt.createdAt)).toLocaleString()
+                        : "Not Available"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -302,15 +322,14 @@ const endPoint =
                     </select>
                   ) : (
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${
-                        appt.status === "Confirmed"
+                      className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${appt.status === "Confirmed"
                           ? "bg-green-100 text-green-700"
                           : appt.status === "Cancelled"
-                          ? "bg-red-100 text-red-700"
-                          : appt.status === "Completed"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
+                            ? "bg-red-100 text-red-700"
+                            : appt.status === "Completed"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-yellow-100 text-yellow-700"
+                        }`}
                     >
                       {appt.status}
                     </span>

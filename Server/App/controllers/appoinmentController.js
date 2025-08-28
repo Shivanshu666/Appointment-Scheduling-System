@@ -1,27 +1,35 @@
-const AppointmentSchedulingModel=require("../models/appoinmentModel");
+const AppointmentSchedulingModel = require("../models/appoinmentModel");
+const appoinmentByUserModel = require("../models/appoinmentUserModel")
 
 /// showing user book hai ki nahi  [/ Get booked slots by date]
-const BookedShowUser=async(req,res)=>{
-    const {date}=req.query;
-    if(!date) return res.status(404).json({error: "Date is required" });
-    try{
-    const appoinment= await AppointmentSchedulingModel.find({date});
-    const bookedSlots=appoinment.map((a)=>a.slot);
-    res.json({ status: 1, bookedSlots })
- // ✅ Correct (matches frontend)
+const BookedShowUser = async (req, res) => {
+    const { date } = req.query;
+    if (!date) return res.status(404).json({ error: "Date is required" });
+    try {
+        // Fetch slots from both models
+        const appoinment = await AppointmentSchedulingModel.find({ date });
+        const appointmentUser = await appoinmentByUserModel.find({ date });
 
-    }catch(err){
-        res.status(500).json({status:0,message: "Error fetching slots"})
+        // Merge slots
+        const bookedSlots = [
+            ...appoinment.map((a) => a.slot),
+            ...appointmentUser.map((u) => u.slot),
+        ]
+        res.json({ status: 1, bookedSlots })
+        // ✅ Correct (matches frontend)
+
+    } catch (err) {
+        res.status(500).json({ status: 0, message: "Error fetching slots" })
     }
 }
 /// show user 
-const showBookedUser=async(req,res)=>{
-    try{
-        const showUser=await AppointmentSchedulingModel.find();
-        res.status(200).json({status:1,msg:"Show User Sucessfully",userRes:showUser});
+const showBookedUser = async (req, res) => {
+    try {
+        const showUser = await AppointmentSchedulingModel.find();
+        res.status(200).json({ status: 1, msg: "Show User Sucessfully", userRes: showUser });
 
-    }catch(err){
-        res.status(500).json({status:0,msg:"Not Show Sucessfully"})
+    } catch (err) {
+        res.status(500).json({ status: 0, msg: "Not Show Sucessfully" })
     }
 
 }
@@ -37,8 +45,9 @@ const InsertUser = async (req, res) => {
 
     try {
         // Check if slot already booked
-        const existingData = await AppointmentSchedulingModel.findOne({ date, slot });
-        if (existingData) return res.status(409).json({ status: 0, msg: "Slot Already Booked" });
+        const existingUserByStaff = await AppointmentSchedulingModel.findOne({ date, slot});
+        const existUser = await appoinmentByUserModel.findOne({ date, slot });
+        if (existingUserByStaff || existUser) return res.status(409).json({ status: 0, msg: "Slot Already Booked" });
 
         const appointment = new AppointmentSchedulingModel({
             userId,
@@ -81,25 +90,25 @@ const deleteBookedUser = async (req, res) => {
 };
 
 
-const updateUser=async(req,res)=>{
-    try{
+const updateUser = async (req, res) => {
+    try {
 
-        const {id}=req.params;
-        const {date,slot,status }=req.body;
-        const appointmentUpdate=await AppointmentSchedulingModel.findByIdAndUpdate(
+        const { id } = req.params;
+        const { date, slot, status } = req.body;
+        const appointmentUpdate = await AppointmentSchedulingModel.findByIdAndUpdate(
             id,
             {
                 date,
                 slot,
                 status,
             },
-            {new:true},
+            { new: true },
         );
-        res.status(201).json({status:1,msg:"Update Appointment Sucessfully",appointmentUpdate});
-    }catch(err){
-        res.status(500).json({status:0,msg:"NOt Update sucessfully"});
+        res.status(201).json({ status: 1, msg: "Update Appointment Sucessfully", appointmentUpdate });
+    } catch (err) {
+        res.status(500).json({ status: 0, msg: "NOt Update sucessfully" });
     }
-    
+
 }
 
 /// uska stsuts update ke liye
@@ -129,4 +138,4 @@ const updateStatus = async (req, res) => {
 
 
 
-module.exports={BookedShowUser,InsertUser,showBookedUser,deleteBookedUser,updateUser,updateStatus}
+module.exports = { BookedShowUser, InsertUser, showBookedUser, deleteBookedUser, updateUser, updateStatus }

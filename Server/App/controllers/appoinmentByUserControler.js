@@ -12,50 +12,109 @@ const transporter = nodemailer.createTransport({
 });
 
 // insert User 
+// const insertUser = async (req, res) => {
+//   try {
+//     const { userId, userName, userEmail, date, slot, status } = req.body;
+//     const existUserByStaff = await appointmentModelByStaff.findOne({
+//       date,
+//       slot,
+//       userId,
+//     });
+//     const exitstUser = await appoinmentByUserModel.findOne({
+//       userId,
+//       date,
+//       slot,
+//     });
+//     if (existUserByStaff || exitstUser) {
+//       return res.status(400).json({ status: 0, msg: "User Already Booked" });
+//     }
+//     const user = await appoinmentByUserModel({
+//       userId,
+//       userName,
+//       userEmail,
+//       date,
+//       slot,
+//       status,
+//     });
+
+//     const newUser = await user.save();
+
+//     // Staff Ko email Bhejne Ka Trika
+//     const mailoption = {
+//       from: '"Clinic App" process.env.MY_EMAIL',
+//       to: "shivanshuofficial123@gmail.com",
+//       subject: "📅 New Appointment Request",
+//       text: `New appointment booked by ${userName} on ${date} at ${slot}`,
+//       Status: `Pending. 
+// Please confirm in the dashboard.`,
+//     };
+//     await transporter.sendMail(mailoption)
+//     res
+//       .status(200)
+//       .json({ status: 1, msg: "User Booked Successfully & Email Sent to Staff", newUser });
+//   } catch (error) {
+//     res.status(500).json({ status: 0, msg: "User Not Sucessfully Booked" });
+//   }
+// };
 const insertUser = async (req, res) => {
   try {
     const { userId, userName, userEmail, date, slot, status } = req.body;
-    const existUserByStaff = await appointmentModelByStaff.findOne({
-      date,
-      slot,
-      userId,
-    });
-    const exitstUser = await appoinmentByUserModel.findOne({
-      userId,
-      date,
-      slot,
-    });
+
+    // Validate basic input
+    if (!userName || !userEmail || !date || !slot) {
+      return res.status(400).json({ status: 0, msg: "Missing required fields" });
+    }
+
+    // Check if already booked (conditionally use userId if present)
+    let existUserByStaff = null;
+    let exitstUser = null;
+
+    if (userId) {
+      existUserByStaff = await appointmentModelByStaff.findOne({ date, slot, userId });
+      exitstUser = await appoinmentByUserModel.findOne({ userId, date, slot });
+    } else {
+      // If no userId, fallback to checking by email + slot + date
+      exitstUser = await appoinmentByUserModel.findOne({ userEmail, date, slot });
+    }
+
     if (existUserByStaff || exitstUser) {
       return res.status(400).json({ status: 0, msg: "User Already Booked" });
     }
-    const user = await appoinmentByUserModel({
-      userId,
+
+    const user = new appoinmentByUserModel({
+      userId, // can be undefined — that's fine
       userName,
       userEmail,
       date,
       slot,
-      status,
+      status: status || "Pending",
     });
 
     const newUser = await user.save();
 
-    // Staff Ko email Bhejne Ka Trika
+    // Send email to staff
     const mailoption = {
-      from: '"Clinic App" process.env.MY_EMAIL',
+      from: process.env.MY_EMAIL,
       to: "shivanshuofficial123@gmail.com",
       subject: "📅 New Appointment Request",
-      text: `New appointment booked by ${userName} on ${date} at ${slot}`,
-      Status: `Pending. 
-Please confirm in the dashboard.`,
+      text: `New appointment booked by ${userName} on ${date} at ${slot}\nStatus: Pending`,
     };
-    await transporter.sendMail(mailoption)
-    res
-      .status(200)
-      .json({ status: 1, msg: "User Booked Successfully & Email Sent to Staff", newUser });
+
+    await transporter.sendMail(mailoption);
+
+    res.status(200).json({
+      status: 1,
+      msg: "User Booked Successfully & Email Sent to Staff",
+      newUser,
+    });
   } catch (error) {
-    res.status(500).json({ status: 0, msg: "User Not Sucessfully Booked" });
+    console.error("Booking error:", error);
+    res.status(500).json({ status: 0, msg: "User Not Successfully Booked" });
   }
 };
+
+
+
 
 // show User
 const showUser = async (req, res) => {

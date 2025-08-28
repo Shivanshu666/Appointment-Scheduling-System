@@ -6,6 +6,7 @@ import UserRegister from "./Components/UserRegister";
 import Navbar from "./Components/Navbar";
 import AppointScheduleUser from "./Components/AppointScheduleUser"
 import History from "./Components/HistoryUser"
+import Home from "./Components/Home";
 // import AppointScheduling from './Components/AppointScheduling';
 
 
@@ -25,6 +26,8 @@ function AppWrapper() {
         <Routes>
           {/* User Register (Homepage) */}
           <Route path="/" element={<UserRegister />} />
+          <Route path="/home" element={<Home/>}/>
+
           <Route path="/appointment" element={<AppointScheduleUser/>}/>
           <Route path="/history" element={<History/>}/>
 

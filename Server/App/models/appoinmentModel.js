@@ -22,7 +22,13 @@ const appoinmentSchema = new mongoose.Schema({
         type: String,
         enum: ['Pending', 'Confirmed', 'Cancelled', 'Completed'], // Example statuses
         default: 'Pending'
+    },
+    bookedTime:{
+      type:Date,
+      default:Date.now,
     }
+},{
+  timestamps:true,
 });
 
 const AppointmentSchedulingModel = mongoose.model(

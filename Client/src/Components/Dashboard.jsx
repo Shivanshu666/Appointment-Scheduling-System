@@ -38,7 +38,12 @@ const DashboardLayout = () => {
     Authorization: `Bearer ${token}`
   }
 });
-      setUpcoming(resUpcoming.data);
+// console.log(resUpcoming.data);
+
+// console.log(resUpcoming.data.appointments);
+
+      setUpcoming(resUpcoming.data.appointments);
+
     } catch (err) {
       console.error("Error fetching dashboard data", err);
     }
