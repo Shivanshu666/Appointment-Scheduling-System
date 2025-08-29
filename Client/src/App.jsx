@@ -7,6 +7,7 @@ import Navbar from "./Components/Navbar";
 import AppointScheduleUser from "./Components/AppointScheduleUser"
 import History from "./Components/HistoryUser"
 import Home from "./Components/Home";
+
 // import AppointScheduling from './Components/AppointScheduling';
 
 
