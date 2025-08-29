@@ -29,7 +29,7 @@ app.use("/appoinmentByUser",appoinmentByUserRoute);
 // Root Route
 app.get("/", (req, res) => {
   res.send("Hello World!");
-});
+});      
 
 // Connect to MongoDB and Start Server
 mongoose
