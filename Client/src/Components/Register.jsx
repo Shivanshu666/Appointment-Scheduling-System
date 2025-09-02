@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+// Shivanshu 
 
 const Register = () => {
   const navigate=useNavigate();
@@ -12,7 +12,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (contact.length < 10) {
       alert("Contact number should be at least 10 digits.");
       return;
