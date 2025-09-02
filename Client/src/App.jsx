@@ -16,7 +16,7 @@ import Home from "./Components/Home";
 function AppWrapper() {
   const location = useLocation();
   // jaha navbar hide karna hai un routes ka list
-  const hideNavbarRoutes = ["/", "/staff", "/dashboard", "/login"];
+  const hideNavbarRoutes = ["/staff", "/dashboard", "/login"];
   // agar current path inme se hai to navbar hide hoga
   const hideNavbar = hideNavbarRoutes.includes(location.pathname);
   return (
@@ -26,7 +26,7 @@ function AppWrapper() {
       <div className="pt-16">
         <Routes>
           {/* User Register (Homepage) */}
-          <Route path="/" element={<UserRegister />} />
+          <Route path="/userRegister" element={<UserRegister />} />
           <Route index element={<Home/>}/>
           <Route path="/home" element={<Home/>}/>
 
