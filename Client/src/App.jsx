@@ -27,6 +27,7 @@ function AppWrapper() {
         <Routes>
           {/* User Register (Homepage) */}
           <Route path="/" element={<UserRegister />} />
+          <Route index element={<Home/>}/>
           <Route path="/home" element={<Home/>}/>
 
           <Route path="/appointment" element={<AppointScheduleUser/>}/>
